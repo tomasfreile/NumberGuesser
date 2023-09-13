@@ -15,6 +15,7 @@ function App() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isAlertOpen, setIsAlertOpen] = useState(false);
   const [showRestart, setShowRestart] = useState(false);
+  const [highscore, setHighscore] = useState(0);
 
   const handleGuess = () => {
     if (guess === "") {
@@ -34,6 +35,9 @@ function App() {
     } else {
       setFeedback("Correct! You win!");
       setShowRestart(true);
+      if (guessCount + 1 < highscore || highscore === 0) {
+        setHighscore(guessCount + 1);
+      }
     }
 
     setGuessCount(guessCount + 1);
@@ -81,15 +85,15 @@ function App() {
         padding: "50px",
       }}
     >
-      <Box
-        sx={{
+      <div
+        style={{
           display: "flex",
           flexDirection: "column",
           borderRadius: "10px",
           justifyContent: "center",
           alignItems: "center",
           padding: "60px",
-          pt: "40px",
+          paddingTop: "40px",
           backgroundColor: "#fff",
         }}
       >
@@ -155,7 +159,6 @@ function App() {
               alignItems: "center",
             }}
           >
-            
             <input
               type="number"
               value={guess}
@@ -201,7 +204,19 @@ function App() {
             </div>
           </Grid>
         )}
-      </Box>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            marginTop: "20px",
+          }}
+        >
+          <Typography variant="h6" sx={{ mt: "10px" }}>
+            {highscore === 0 ? "" : "Highscore: " + highscore}
+          </Typography>
+        </div>
+      </div>
       <Modal
         open={isModalOpen}
         onClose={closeModal}
@@ -213,10 +228,10 @@ function App() {
           alignItems: "center",
         }}
       >
-        <Box
-          sx={{
+        <div
+          style={{
             borderRadius: "10px",
-            p: "20px",
+            padding: "20px",
             textAlign: "center",
             backgroundColor: "#fff",
             width: "200px",
@@ -228,7 +243,7 @@ function App() {
               cursor: "pointer",
               position: "relative",
               bottom: "10px",
-              left: "10px"
+              left: "10px",
             }}
             onClick={closeModal}
           />
@@ -244,7 +259,7 @@ function App() {
               <ReplayIcon />
             </Button>
           )}
-        </Box>
+        </div>
       </Modal>
     </Grid>
   );
