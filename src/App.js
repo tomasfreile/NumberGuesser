@@ -1,26 +1,62 @@
 import React, { useState } from "react";
-import { Grid, Typography, Box, Modal, Button } from "@mui/material";
+import { Grid, Typography, Box, Modal, Button, Alert } from "@mui/material";
 import FavoriteIcon from "@mui/icons-material/Favorite";
-import HeartBrokenIcon from '@mui/icons-material/HeartBroken';
-import "./App.css";
+import HeartBrokenIcon from "@mui/icons-material/HeartBroken";
+import ReplayIcon from "@mui/icons-material/Replay";
+import CloseIcon from "@mui/icons-material/Close";
 
 function App() {
   const [start, setStart] = useState(false);
   const [guess, setGuess] = useState("");
   const [guessCount, setGuessCount] = useState(0);
-  const [number, setNumber] = useState(Math.floor(Math.random() * 101));
+  const [number, setNumber] = useState(Math.floor(Math.random() * 100));
   const [feedback, setFeedback] = useState("");
   const [maxGuesses, setMaxGuesses] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isAlertOpen, setIsAlertOpen] = useState(false);
+  const [showRestart, setShowRestart] = useState(false);
 
   const handleGuess = () => {
-    setGuessCount(guessCount + 1);
-    if (guess < number) {
+    if (guess === "") {
+      setIsAlertOpen(true);
+      return;
+    } else {
+      setIsAlertOpen(false);
+    }
+
+    if (guessCount + 1 >= maxGuesses && guess !== number) {
+      setFeedback("You lose! The number was " + number);
+      setShowRestart(true);
+    } else if (guess < number) {
       setFeedback("The number is higher!");
     } else if (guess > number) {
       setFeedback("The number is lower!");
     } else {
       setFeedback("Correct! You win!");
+      setShowRestart(true);
     }
+
+    setGuessCount(guessCount + 1);
+    setIsModalOpen(true);
+  };
+
+  const handleRestart = () => {
+    setStart(false);
+    setGuess("");
+    setGuessCount(0);
+    setFeedback("");
+    setIsModalOpen(false);
+    setShowRestart(false);
+    setMaxGuesses(null);
+    setNumber(Math.floor(Math.random() * 100));
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+  };
+
+  const closeAlert = () => {
+    setIsAlertOpen(false);
   };
 
   const handleInputChange = (e) => {
@@ -42,7 +78,7 @@ function App() {
         flexDirection: "column",
         height: "100vh",
         backgroundColor: "#5c9aff",
-        padding: "20px",
+        padding: "50px",
       }}
     >
       <Box
@@ -52,7 +88,7 @@ function App() {
           borderRadius: "10px",
           justifyContent: "center",
           alignItems: "center",
-          padding: "80px",
+          padding: "60px",
           pt: "40px",
           backgroundColor: "#fff",
         }}
@@ -119,12 +155,14 @@ function App() {
               alignItems: "center",
             }}
           >
+            
             <input
               type="number"
               value={guess}
               onChange={handleInputChange}
+              placeholder="Enter a number"
               style={{
-                width: "120px",
+                width: "180px",
                 height: "50px",
                 borderRadius: "5px",
                 textAlign: "center",
@@ -135,14 +173,79 @@ function App() {
               variant="outlined"
               sx={{
                 mt: "15px",
+                mb: "15px",
               }}
               onClick={handleGuess}
             >
               Guess
             </Button>
+            {isAlertOpen && (
+              <Alert
+                sx={{ mb: "10px", cursor: "pointer" }}
+                severity="warning"
+                onClick={closeAlert}
+              >
+                Please enter a number
+              </Alert>
+            )}
+            <div>
+              {Array.from({ length: maxGuesses }).map((_, index) => (
+                <span key={index}>
+                  {index < maxGuesses - guessCount ? (
+                    <FavoriteIcon sx={{ color: "red", fontSize: 30 }} />
+                  ) : (
+                    <HeartBrokenIcon sx={{ color: "gray", fontSize: 30 }} />
+                  )}
+                </span>
+              ))}
+            </div>
           </Grid>
         )}
       </Box>
+      <Modal
+        open={isModalOpen}
+        onClose={closeModal}
+        aria-labelledby="feedback-modal"
+        aria-describedby="feedback-message"
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <Box
+          sx={{
+            borderRadius: "10px",
+            p: "20px",
+            textAlign: "center",
+            backgroundColor: "#fff",
+            width: "200px",
+          }}
+        >
+          <CloseIcon
+            sx={{
+              float: "right",
+              cursor: "pointer",
+              position: "relative",
+              bottom: "10px",
+              left: "10px"
+            }}
+            onClick={closeModal}
+          />
+          <Typography variant="body1" id="feedback-message">
+            {feedback}
+          </Typography>
+          {showRestart && (
+            <Button
+              variant="contained"
+              sx={{ mt: "20px" }}
+              onClick={handleRestart}
+            >
+              <ReplayIcon />
+            </Button>
+          )}
+        </Box>
+      </Modal>
     </Grid>
   );
 }
